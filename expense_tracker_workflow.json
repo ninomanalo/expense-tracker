@@ -1,0 +1,170 @@
+{
+  "name": "Local AI Expense Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a smart financial expense assistant. Your job is to process user messages regarding their spending.\n\nWhen a user logs an expense, you MUST use the Google Sheets tool to append a row to the spreadsheet. Do not just format the text in the chat; you must call the tool to save the data.\n\nCRITICAL TOOL RULES:\nWhen you use the Google Sheets tool, you must construct a fresh payload. You are STRICTLY FORBIDDEN from passing n8n system metadata into the tool. You must actively remove or ignore the following keys: \"action\", \"sessionId\", \"chatInput\", and \"toolCallId\".\n\nYour output to the tool must ONLY contain exactly these four keys to match the sheet headers:\n- Date (default to today if omitted)\n- Amount (just the number)\n- Category (e.g., Food, Transport, Bills, Shopping, Health)\n- Description (brief summary)\n\nWhen a user asks a question about their spending:\n- Identify if they are asking for daily, weekly, monthly, or yearly totals.\n- Inform them that you are retrieving their expense records."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [224, 0],
+      "id": "d6ab915d-010d-4c15-97c3-8ce50bd1d1d1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [128, 192],
+      "id": "6c523abb-a82d-4348-9380-95ad6795a5d5",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [0, 0],
+      "id": "6778037f-490f-42e0-8e63-515c21b43241",
+      "name": "When chat message received",
+      "webhookId": "c5dfeb79-4093-4440-a025-5888b70c19d6"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to save expenses. You MUST provide the exact arguments: Date, Amount, Category, Description.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "Expense Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [496, 176],
+      "id": "218e05ab-b2f5-4f7c-9ddd-8fd9e6190643",
+      "name": "Append row in sheet in Google Sheets"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f780520a-955d-4d35-a968-ad02aa6dfffd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d7eb24bbb2a751749e58017f38c8f5e50a91e172ccd24522496f5dc88f9d26ca"
+  },
+  "nodeGroups": [],
+  "id": "9Q7f32z3B4OXEzKq",
+  "tags": []
+}
